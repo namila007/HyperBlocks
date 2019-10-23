@@ -36,6 +36,49 @@ function generateChannelArtifacts() {
     echo "Failed to generate channel configuration transaction..."
     exit 1
     fi
+
+    echo
+  echo "#################################################################"
+  echo "#######    Generating anchor peer update for SupplierMSP   ##########"
+  echo "#################################################################"
+  set -x
+  bin/configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate ./channel-artifacts/SupplierMSPanchors.tx -channelID $CHANNEL_NAME -asOrg SupplierMSP
+  res=$?
+  set +x
+  if [ $res -ne 0 ]; then
+    echo "Failed to generate anchor peer update for SupplierMSP..."
+    exit 1
+  fi
+
+  echo
+  echo "#################################################################"
+  echo "#######    Generating anchor peer update for ManufacturerMSP   ##########"
+  echo "#################################################################"
+  set -x
+  bin/configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate \
+    ./channel-artifacts/ManufacturerMSPanchors.tx -channelID $CHANNEL_NAME -asOrg ManufacturerMSP
+  res=$?
+  set +x
+  if [ $res -ne 0 ]; then
+    echo "Failed to generate anchor peer update for ManufacturerMSP..."
+    exit 1
+  fi
+  echo
+
+   echo
+  echo "#################################################################"
+  echo "#######    Generating anchor peer update for DistributorMSP   ##########"
+  echo "#################################################################"
+  set -x
+  bin/configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate \
+    ./channel-artifacts/DistributorMSPanchors.tx -channelID $CHANNEL_NAME -asOrg DistributorMSP
+  res=$?
+  set +x
+  if [ $res -ne 0 ]; then
+    echo "Failed to generate anchor peer update for DistributorMSP..."
+    exit 1
+  fi
+  echo
 }
 function replacePrivateKey() {
   # sed on MacOSX does not support -i flag with a null extension. We will use
@@ -48,23 +91,24 @@ function replacePrivateKey() {
   fi
 
   # Copy the template to the file that will be modified to add the private key
-  cp docker-compose-e2e-template.yaml docker-compose-e2e.yaml
+  cp docker-compose-cli.yaml docker-compose-e2e.yaml
 
   # The next steps will replace the template's contents with the
   # actual values of the private key file names for the two CAs.
   CURRENT_DIR=$PWD
-  cd crypto-config/peerOrganizations/org1.example.com/ca/
+  cd crypto-config/peerOrganizations/supplier.namz.com/ca/
   PRIV_KEY=$(ls *_sk)
   cd "$CURRENT_DIR"
   sed $OPTS "s/CA1_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
-  cd crypto-config/peerOrganizations/org2.example.com/ca/
+  cd crypto-config/peerOrganizations/manufacturer.namz.com/ca/
   PRIV_KEY=$(ls *_sk)
   cd "$CURRENT_DIR"
   sed $OPTS "s/CA2_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
-  # If MacOSX, remove the temporary backup of the docker-compose file
-  if [ "$ARCH" == "Darwin" ]; then
-    rm docker-compose-e2e.yamlt
-  fi
+  cd crypto-config/peerOrganizations/distributor.namz.com/ca/
+  PRIV_KEY=$(ls *_sk)
+  cd "$CURRENT_DIR"
+  sed $OPTS "s/CA2_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
+  
 }
 
 function networkUp() {
@@ -76,17 +120,12 @@ function networkUp() {
     generateChannelArtifacts
   fi
   COMPOSE_FILES="-f ${COMPOSE_FILE}"
-  if [ "${CERTIFICATE_AUTHORITIES}" == "true" ]; then
-    COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_CA}"
-    export BYFN_CA1_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/distributor.namz.com/ca && ls *_sk)
-    export BYFN_CA2_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/supplier.namz.com/ca && ls *_sk)
-    export BYFN_CA2_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/manufacturer.namz.com/ca && ls *_sk)
-  fi
-  if [ "${CONSENSUS_TYPE}" == "kafka" ]; then
-    COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_KAFKA}"
-  elif [ "${CONSENSUS_TYPE}" == "etcdraft" ]; then
-    COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_RAFT2}"
-  fi
+  # if [ "${CERTIFICATE_AUTHORITIES}" == "true" ]; then
+  #   COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_CA}"
+  #   export BYFN_CA1_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/distributor.namz.com/ca && ls *_sk)
+  #   export BYFN_CA2_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/supplier.namz.com/ca && ls *_sk)
+  #   export BYFN_CA2_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/manufacturer.namz.com/ca && ls *_sk)
+  # fi
   if [ "${IF_COUCHDB}" == "couchdb" ]; then
     COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_COUCH}"
   fi
@@ -98,11 +137,11 @@ function networkUp() {
   fi
 
   # now run the end to end script
-  # docker exec cli scripts/script.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $NO_CHAINCODE
-  # if [ $? -ne 0 ]; then
-  #   echo "ERROR !!!! Test failed"
-  #   exit 1
-  # fi
+  docker exec cli scripts/script.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $NO_CHAINCODE
+  if [ $? -ne 0 ]; then
+    echo "ERROR !!!! Test failed"
+    exit 1
+  fi
 }
 # Obtain CONTAINER_IDS and remove them
 # TODO Might want to make this optional - could clear other containers
@@ -143,7 +182,7 @@ function networkDown() {
     #Cleanup images
     removeUnwantedImages
     # remove orderer block and other channel configuration transactions and certs
-    rm -rf channel-artifacts/*.block channel-artifacts/*.tx crypto-config ./org3-artifacts/crypto-config/ channel-artifacts/org3.json
+    rm -rf channel-artifacts/*.block channel-artifacts/*.tx crypto-config
     # remove the docker-compose yaml file that was customized to the example
     rm -f docker-compose-e2e.yaml
   fi
@@ -155,8 +194,7 @@ CLI_TIMEOUT=10
 LANGUAGE=golang
 CLI_DELAY=3
 COMPOSE_FILE=docker-compose-cli.yaml
-COMPOSE_FILE_COUCH=docker-compose-couch.yaml
-COMPOSE_FILE_CA=docker-compose-ca.yaml
+#COMPOSE_FILE_COUCH=docker-compose-couch.yaml
 MODE=$1
 IMAGETAG="latest"
 CONSENSUS_TYPE="solo"

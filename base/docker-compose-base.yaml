@@ -33,7 +33,7 @@ services:
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
       - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.supplier.namz.com:7151
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.supplier.namz.com:7051
-      - CORE_PEER_LOCALMSPID=supplierMSP
+      - CORE_PEER_LOCALMSPID=SupplierMSP
     volumes:
         - /var/run/:/host/var/run/
         - ../crypto-config/peerOrganizations/supplier.namz.com/peers/peer0.supplier.namz.com/msp:/etc/hyperledger/fabric/msp
@@ -55,7 +55,7 @@ services:
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7152
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.supplier.namz.com:7151
       - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.supplier.namz.com:7051
-      - CORE_PEER_LOCALMSPID=supplierMSP
+      - CORE_PEER_LOCALMSPID=SupplierMSP
     volumes:
         - /var/run/:/host/var/run/
         - ../crypto-config/peerOrganizations/supplier.namz.com/peers/peer1.supplier.namz.com/msp:/etc/hyperledger/fabric/msp
@@ -78,7 +78,7 @@ services:
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:8052
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.manufacturer.namz.com:8051
       - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.manufacturer.namz.com:8151
-      - CORE_PEER_LOCALMSPID=manufacturerMSP
+      - CORE_PEER_LOCALMSPID=ManufacturerMSP
     volumes:
         - /var/run/:/host/var/run/
         - ../crypto-config/peerOrganizations/manufacturer.namz.com/peers/peer0.manufacturer.namz.com/msp:/etc/hyperledger/fabric/msp
@@ -100,7 +100,7 @@ services:
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:8152
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.manufacturer.namz.com:8151
       - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.manufacturer.namz.com:8051
-      - CORE_PEER_LOCALMSPID=manufacturerMSP
+      - CORE_PEER_LOCALMSPID=ManufacturerMSP
     volumes:
         - /var/run/:/host/var/run/
         - ../crypto-config/peerOrganizations/manufacturer.namz.com/peers/peer1.manufacturer.namz.com/msp:/etc/hyperledger/fabric/msp
@@ -123,7 +123,7 @@ services:
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9052
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.distributor.namz.com:9051
       - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.distributor.namz.com:9151
-      - CORE_PEER_LOCALMSPID=distributorMSP
+      - CORE_PEER_LOCALMSPID=DistributorMSP
     volumes:
         - /var/run/:/host/var/run/
         - ../crypto-config/peerOrganizations/distributor.namz.com/peers/peer0.distributor.namz.com/msp:/etc/hyperledger/fabric/msp
@@ -145,7 +145,7 @@ services:
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9152
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.distributor.namz.com:9151
       - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.distributor.namz.com:9051
-      - CORE_PEER_LOCALMSPID=distributorMSP
+      - CORE_PEER_LOCALMSPID=DistributorMSP
     volumes:
         - /var/run/:/host/var/run/
         - ../crypto-config/peerOrganizations/distributor.namz.com/peers/peer1.distributor.namz.com/msp:/etc/hyperledger/fabric/msp

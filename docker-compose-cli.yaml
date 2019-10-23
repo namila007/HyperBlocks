@@ -9,25 +9,15 @@ volumes:
   orderer.namz.com:
   peer0.supplier.namz.com:
   peer1.supplier.namz.com:
-  # peer2.supplier.namz.com:
-  # peer3.supplier.namz.com:
-  # peer4.supplier.namz.com:
   peer0.manufacturer.namz.com:
   peer1.manufacturer.namz.com:
-  # peer2.manufacturer.namz.com:
-  # peer3.manufacturer.namz.com:
-  # peer4.manufacturer.namz.com:
   peer0.distributor.namz.com:
   peer1.distributor.namz.com:
-  # peer2.distributor.namz.com:
-  # peer3.distributor.namz.com:
-  # peer4.distributor.namz.com:
 
 networks:
   byfn:
 
 services:
-
   orderer.namz.com:
     extends:
       file:   base/docker-compose-base.yaml
@@ -53,30 +43,6 @@ services:
     networks:
       - byfn
 
-  # peer2.supplier.namz.com:
-  #   container_name: peer2.supplier.namz.com
-  #   extends:
-  #     file:  base/docker-compose-base.yaml
-  #     service: peer2.supplier.namz.com
-  #   networks:
-  #     - byfn
-
-  # peer3.supplier.namz.com:
-  #   container_name: peer3.supplier.namz.com
-  #   extends:
-  #     file:  base/docker-compose-base.yaml
-  #     service: peer3.supplier.namz.com
-  #   networks:
-  #     - byfn
-
-  # peer4.supplier.namz.com:
-  #   container_name: peer4.supplier.namz.com
-  #   extends:
-  #     file:  base/docker-compose-base.yaml
-  #     service: peer0.supplier.namz.com
-  #   networks:
-  #     - byfn
-
   peer0.manufacturer.namz.com:
     container_name: peer0.manufacturer.namz.com
     extends:
@@ -93,30 +59,6 @@ services:
     networks:
       - byfn
 
-  # peer2.manufacturer.namz.com:
-  #   container_name: peer2.manufacturer.namz.com
-  #   extends:
-  #     file:  base/docker-compose-base.yaml
-  #     service: peer0.manufacturer.namz.com
-  #   networks:
-  #     - byfn
-
-  # peer3.manufacturer.namz.com:
-  #   container_name: peer3.manufacturer.namz.com
-  #   extends:
-  #     file:  base/docker-compose-base.yaml
-  #     service: peer0.manufacturer.namz.com
-  #   networks:
-  #     - byfn
-
-  # peer4.manufacturer.namz.com:
-  #   container_name: peer4.manufacturer.namz.com
-  #   extends:
-  #     file:  base/docker-compose-base.yaml
-  #     service: peer0.manufacturer.namz.com
-  #   networks:
-  #     - byfn
-
   peer0.distributor.namz.com:
     container_name: peer0.distributor.namz.com
     extends:
@@ -132,30 +74,6 @@ services:
       service: peer1.distributor.namz.com
     networks:
       - byfn
-
-  # peer2.distributor.namz.com:
-  #   container_name: peer2.distributor.namz.com
-  #   extends:
-  #     file:  base/docker-compose-base.yaml
-  #     service: peer0.distributor.namz.com
-  #   networks:
-  #     - byfn
-
-  # peer3.distributor.namz.com:
-  #   container_name: peer3.distributor.namz.com
-  #   extends:
-  #     file:  base/docker-compose-base.yaml
-  #     service: peer0.distributor.namz.com
-  #   networks:
-  #     - byfn
-
-  # peer4.distributor.namz.com:
-  #   container_name: peer4.distributor.namz.com
-  #   extends:
-  #     file:  base/docker-compose-base.yaml
-  #     service: peer0.distributor.namz.com
-  #   networks:
-  #     - byfn
 
   cli:
     container_name: cli
@@ -188,18 +106,9 @@ services:
       - orderer.namz.com
       - peer0.supplier.namz.com
       - peer1.supplier.namz.com
-      # - peer2.supplier.namz.com
-      # - peer3.supplier.namz.com
-      # - peer4.supplier.namz.com
       - peer0.manufacturer.namz.com
       - peer1.manufacturer.namz.com
-      # - peer2.manufacturer.namz.com
-      # - peer3.manufacturer.namz.com
-      # - peer4.manufacturer.namz.com
       - peer0.distributor.namz.com
       - peer1.distributor.namz.com
-      # - peer2.distributor.namz.com
-      # - peer3.distributor.namz.com
-      # - peer4.distributor.namz.com
     networks:
       - byfn
