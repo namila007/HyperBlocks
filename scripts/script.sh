@@ -17,18 +17,15 @@ VERBOSE="$5"
 NO_CHAINCODE="$6"
 : ${CHANNEL_NAME:="mychannel"}
 : ${DELAY:="3"}
-: ${LANGUAGE:="golang"}
+: ${LANGUAGE:="node"}
 : ${TIMEOUT:="10"}
 : ${VERBOSE:="false"}
 : ${NO_CHAINCODE:="false"}
 LANGUAGE=`echo "$LANGUAGE" | tr [:upper:] [:lower:]`
 COUNTER=1
 MAX_RETRY=10
-
-CC_SRC_PATH="github.com/chaincode/chaincode_example02/go/"
-if [ "$LANGUAGE" = "node" ]; then
-	CC_SRC_PATH="/opt/gopath/src/github.com/chaincode/chaincode_example02/node/"
-fi
+COMPOSE_PROJECT_NAME="hyperblock"
+CC_SRC_PATH="/opt/gopath/src/github.com/chaincode/"
 
 
 echo "Channel name : "$CHANNEL_NAME
@@ -85,31 +82,34 @@ updateAnchorPeers 0 3
 
 if [ "${NO_CHAINCODE}" != "true" ]; then
 
-	## Install chaincode on peer0.org1 and peer0.org2
+	# Install chaincode on peer0.org1 and peer0.org2
 	echo "Installing chaincode on peer0.org1..."
 	installChaincode 0 1
 	echo "Install chaincode on peer0.org2..."
 	installChaincode 0 2
+	echo "Install chaincode on peer0.org3..."
+	installChaincode 0 3
 
 	# Instantiate chaincode on peer0.org2
-	echo "Instantiating chaincode on peer0.org2..."
-	instantiateChaincode 0 2
-
+	echo "Instantiating chaincode on peer0.org1..."
+	instantiateChaincode 0 1
+	sleep 20
+	
+	# # Invoke chaincode on peer0.org1 and peer0.org2
+	echo "Sending invoke transaction on peer0.org1 peer0.org2..."
+	chaincodeInvoke 0 1 
+	
 	# Query chaincode on peer0.org1
 	echo "Querying chaincode on peer0.org1..."
-	chaincodeQuery 0 1 100
-
-	# Invoke chaincode on peer0.org1 and peer0.org2
-	echo "Sending invoke transaction on peer0.org1 peer0.org2..."
-	chaincodeInvoke 0 1 0 2
+	chaincodeQuery 0 1 '{"id":"102032","temp":"68","org":"KazVith","loc":"Kandy"}'
 	
-	## Install chaincode on peer1.org2
-	echo "Installing chaincode on peer1.org2..."
-	installChaincode 1 2
+	# # ## Install chaincode on peer1.org2
+	# echo "Installing chaincode on peer1.org2..."
+	# installChaincode 1 2
 
-	# Query on chaincode on peer1.org2, check if the result is 90
-	echo "Querying chaincode on peer1.org2..."
-	chaincodeQuery 1 2 90
+	# # # Query on chaincode on peer1.org2, check if the result is 90
+	# echo "Querying chaincode on peer1.org2..."
+	# chaincodeQuery 1 2 '{"id":"102032","temp":"68","org":"KazVith","loc":"Kandy"}'
 	
 fi
 

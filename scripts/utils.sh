@@ -6,10 +6,10 @@
 
 # This is a collection of bash functions used by different scripts
 
-ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/namz.com/orderers/orderer.namz.com/msp/tlscacerts/tlsca.namz.com-cert.pem
-PEER0_ORG1_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/supplier.namz.com/peers/peer0.supplier.namz.com/tls/ca.crt
-PEER0_ORG2_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/manufacturer.namz.com/peers/peer0.manufacturer.namz.com/tls/ca.crt
-PEER0_ORG3_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/distributor.namz.com/peers/peer0.distributor.namz.com/tls/ca.crt
+export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/namz.com/orderers/orderer.namz.com/msp/tlscacerts/tlsca.namz.com-cert.pem
+export PEER0_ORG1_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/supplier.namz.com/peers/peer0.supplier.namz.com/tls/ca.crt
+export PEER0_ORG2_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/manufacturer.namz.com/peers/peer0.manufacturer.namz.com/tls/ca.crt
+export PEER0_ORG3_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/distributor.namz.com/peers/peer0.distributor.namz.com/tls/ca.crt
 
 # verify the result of the end-to-end test
 verifyResult() {
@@ -134,18 +134,20 @@ instantiateChaincode() {
   ORG=$2
   setGlobals $PEER $ORG
   VERSION=${3:-1.0}
-
+ 
   # while 'peer chaincode' command can get the orderer endpoint from the peer
   # (if join was successful), let's supply it directly as we know it using
   # the "-o" option
   if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
     set -x
-    peer chaincode instantiate -o orderer.namz.com:7050 -C $CHANNEL_NAME -n mycc -l ${LANGUAGE} -v ${VERSION} -c '{"Args":["init","a","100","b","200"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')" >&log.txt
+    #(batchId,temperature,organization,location)
+    peer chaincode instantiate -o orderer.namz.com:7050 -C $CHANNEL_NAME -n mycc -l ${LANGUAGE} -v ${VERSION} -c '{"Args":[]}' -P "OR ('SupplierMSP.peer','ManufacturerMSP.peer','DistributorMSP.peer')" >&log.txt
     res=$?
     set +x
+    #'{"function":"addBatch","Args":["102032","68","KazVith","Kandy"]}'
   else
     set -x
-    peer chaincode instantiate -o orderer.namz.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -l ${LANGUAGE} -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')" >&log.txt
+    peer chaincode instantiate -o orderer.namz.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -l ${LANGUAGE} -v 1.0 -c '{"Args":[]}' -P "OR ('SupplierMSP.peer','ManufacturerMSP.peer','DistributorMSP.peer')" >&log.txt
     res=$?
     set +x
   fi
@@ -187,7 +189,7 @@ chaincodeQuery() {
     sleep $DELAY
     echo "Attempting to Query peer${PEER}.org${ORG} ...$(($(date +%s) - starttime)) secs"
     set -x
-    peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}' >&log.txt
+    peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"function":"getBatch","Args":["102032"]}' >&log.txt
     res=$?
     set +x
     test $res -eq 0 && VALUE=$(cat log.txt | awk '/Query Result/ {print $NF}')
@@ -195,7 +197,7 @@ chaincodeQuery() {
     # removed the string "Query Result" from peer chaincode query command
     # result. as a result, have to support both options until the change
     # is merged.
-    test $rc -ne 0 && VALUE=$(cat log.txt | egrep '^[0-9]+$')
+    test $rc -ne 0 && VALUE=$(cat log.txt | egrep '{"id":"102032","temp":"68","org":"KazVith","loc":"Kandy"}')
     test "$VALUE" = "$EXPECTED_RESULT" && let rc=0
   done
   echo
@@ -306,12 +308,16 @@ chaincodeInvoke() {
   # it using the "-o" option
   if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
     set -x
-    peer chaincode invoke -o orderer.namz.com:7050 -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c '{"Args":["invoke","a","b","10"]}' >&log.txt
+     peer chaincode invoke -o orderer.namz.com:7050 -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c '{"function":"addBatch","Args":["102032","68","KazVith","Kandy"]}' >&log.txt
+    # peer chaincode invoke -o orderer.namz.com:7050 -C $CHANNEL_NAME -n mycc  -c '{"function":"addBatch","Args":["102032","68","KazVith","Kandy"]}' >&log.txt
+    
     res=$?
     set +x
   else
     set -x
-    peer chaincode invoke -o orderer.namz.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c '{"Args":["invoke","a","b","10"]}' >&log.txt
+    peer chaincode invoke -o orderer.namz.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c '{"function":"addBatch","Args":["102032","68","KazVith","Kandy"]}' >&log.txt
+    # peer chaincode invoke -o orderer.namz.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc  -c '{"function":"addBatch","Args":["102032","68","KazVith","Kandy"]}' >&log.txt
+    
     res=$?
     set +x
   fi

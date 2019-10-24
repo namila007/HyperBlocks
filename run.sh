@@ -120,15 +120,19 @@ function networkUp() {
     generateChannelArtifacts
   fi
   COMPOSE_FILES="-f ${COMPOSE_FILE}"
-  # if [ "${CERTIFICATE_AUTHORITIES}" == "true" ]; then
-  #   COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_CA}"
-  #   export BYFN_CA1_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/distributor.namz.com/ca && ls *_sk)
-  #   export BYFN_CA2_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/supplier.namz.com/ca && ls *_sk)
-  #   export BYFN_CA2_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/manufacturer.namz.com/ca && ls *_sk)
-  # fi
+  if [ "${CERTIFICATE_AUTHORITIES}" == "true" ]; then
+    COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_CA}"
+    echo $COMPOSE_FILES
+    export BYFN_CA1_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/distributor.namz.com/ca && ls *_sk)
+    export BYFN_CA2_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/supplier.namz.com/ca && ls *_sk)
+    export BYFN_CA3_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/manufacturer.namz.com/ca && ls *_sk)
+    echo $BYFN_CA1_PRIVATE_KEY
+    echo $BYFN_CA2_PRIVATE_KEY
+  fi
   if [ "${IF_COUCHDB}" == "couchdb" ]; then
     COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_COUCH}"
   fi
+
   IMAGE_TAG=$IMAGETAG docker-compose ${COMPOSE_FILES} up -d 2>&1
   docker ps -a
   if [ $? -ne 0 ]; then
@@ -188,15 +192,20 @@ function networkDown() {
   fi
 }
 
-SYS_CHANNEL="namz-sys-channel"
-CHANNEL_NAME="mychannel"
+export SYS_CHANNEL="namz-sys-channel"
+export CHANNEL_NAME="mychannel"
 CLI_TIMEOUT=10
-LANGUAGE=golang
+LANGUAGE=node
 CLI_DELAY=3
 COMPOSE_FILE=docker-compose-cli.yaml
+COMPOSE_FILE_CA=docker-compose-ca.yaml
+CERTIFICATE_AUTHORITIES="false"
+export COMPOSE_PROJECT_NAME="hyperblock"
+
 #COMPOSE_FILE_COUCH=docker-compose-couch.yaml
 MODE=$1
 IMAGETAG="latest"
+export IMAGE_TAG="latest"
 CONSENSUS_TYPE="solo"
 shift
 # Determine whether starting, stopping, restarting, generating or upgrading
@@ -221,7 +230,7 @@ elif [ "${MODE}" == "down" ]; then ## Clear the network
   networkDown
 elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
   generateCerts
-  #replacePrivateKey
+  replacePrivateKey
   generateChannelArtifacts
 elif [ "${MODE}" == "restart" ]; then ## Restart the network
   networkDown
