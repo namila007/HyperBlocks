@@ -1,7 +1,4 @@
 OrdererOrgs:
-  # --------------------------------------------------------------------------- 
-  # Orderer 
-  # ---------------------------------------------------------------------------
   - Name: Orderer
     Domain: namz.com
     EnableNodeOUs: true
@@ -16,9 +13,6 @@ OrdererOrgs:
 # nodes 
 # ---------------------------------------------------------------------------
 PeerOrgs:
-  # --------------------------------------------------------------------------- 
-  # Org1 
-  # ---------------------------------------------------------------------------
   - Name: supplier
     Domain: supplier.namz.com
     EnableNodeOUs: true
@@ -64,7 +58,7 @@ PeerOrgs:
     # with name collisions 
     # ---------------------------------------------------------------------------
     Template:
-      Count: 5
+      Count: 2
       # Start: 5 Hostname: {{.Prefix}}{{.Index}} # 
       # default
     # --------------------------------------------------------------------------- 
@@ -82,7 +76,7 @@ PeerOrgs:
     Domain: manufacturer.namz.com
     EnableNodeOUs: true
     Template:
-      Count: 5
+      Count: 2
     Users:
       Count: 2
       
@@ -90,6 +84,6 @@ PeerOrgs:
     Domain: distributor.namz.com
     EnableNodeOUs: true
     Template:
-      Count: 5
+      Count: 2
     Users:
       Count: 2
