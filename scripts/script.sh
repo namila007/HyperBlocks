@@ -54,8 +54,9 @@ createChannel() {
 }
 
 joinChannel () {
-	for org in 1 3; do
+	for org in 1 2 3; do
 	    for peer in 0 1; do
+		echo $org $peer
 		joinChannelWithRetry $peer $org
 		echo "===================== peer${peer}.${org} joined channel '$CHANNEL_NAME' ===================== "
 		sleep $DELAY
@@ -93,7 +94,7 @@ if [ "${NO_CHAINCODE}" != "true" ]; then
 	# Instantiate chaincode on peer0.org2
 	echo "Instantiating chaincode on peer0.org1..."
 	instantiateChaincode 0 1
-	sleep 20
+	# sleep 20
 	
 	# # Invoke chaincode on peer0.org1 and peer0.org2
 	echo "Sending invoke transaction on peer0.org1 peer0.org2..."
@@ -104,12 +105,12 @@ if [ "${NO_CHAINCODE}" != "true" ]; then
 	chaincodeQuery 0 1 '{"id":"102032","temp":"68","org":"KazVith","loc":"Kandy"}'
 	
 	# # ## Install chaincode on peer1.org2
-	# echo "Installing chaincode on peer1.org2..."
-	# installChaincode 1 2
+	echo "Installing chaincode on peer1.org2..."
+	installChaincode 1 2
 
 	# # # Query on chaincode on peer1.org2, check if the result is 90
-	# echo "Querying chaincode on peer1.org2..."
-	# chaincodeQuery 1 2 '{"id":"102032","temp":"68","org":"KazVith","loc":"Kandy"}'
+	echo "Querying chaincode on peer1.org2..."
+	chaincodeQuery 1 2 '{"id":"102032","temp":"68","org":"KazVith","loc":"Kandy"}'
 	
 fi
 
