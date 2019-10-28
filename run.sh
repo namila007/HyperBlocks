@@ -91,7 +91,7 @@ function replacePrivateKey() {
   fi
 
   # Copy the template to the file that will be modified to add the private key
-  cp docker-compose-cli.yaml docker-compose-e2e.yaml
+  cp docker-compose-e2e-template.yaml docker-compose-e2e.yaml
 
   # The next steps will replace the template's contents with the
   # actual values of the private key file names for the two CAs.
@@ -99,11 +99,11 @@ function replacePrivateKey() {
   cd crypto-config/peerOrganizations/supplier.namz.com/ca/
   PRIV_KEY=$(ls *_sk)
   cd "$CURRENT_DIR"
-  sed $OPTS "s/CA1_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
+  sed $OPTS "s/CA0_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
   cd crypto-config/peerOrganizations/manufacturer.namz.com/ca/
   PRIV_KEY=$(ls *_sk)
   cd "$CURRENT_DIR"
-  sed $OPTS "s/CA2_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
+  sed $OPTS "s/CA1_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
   cd crypto-config/peerOrganizations/distributor.namz.com/ca/
   PRIV_KEY=$(ls *_sk)
   cd "$CURRENT_DIR"
@@ -123,9 +123,9 @@ function networkUp() {
   if [ "${CERTIFICATE_AUTHORITIES}" == "true" ]; then
     COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_CA}"
     echo $COMPOSE_FILES
-    export BYFN_CA1_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/distributor.namz.com/ca && ls *_sk)
-    export BYFN_CA2_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/supplier.namz.com/ca && ls *_sk)
-    export BYFN_CA3_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/manufacturer.namz.com/ca && ls *_sk)
+    export BYFN_CA3_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/distributor.namz.com/ca && ls *_sk)
+    export BYFN_CA1_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/supplier.namz.com/ca && ls *_sk)
+    export BYFN_CA2_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/manufacturer.namz.com/ca && ls *_sk)
     echo $BYFN_CA1_PRIVATE_KEY
     echo $BYFN_CA2_PRIVATE_KEY
   fi
@@ -199,7 +199,7 @@ LANGUAGE=node
 CLI_DELAY=3
 COMPOSE_FILE=docker-compose-cli.yaml
 COMPOSE_FILE_CA=docker-compose-ca.yaml
-CERTIFICATE_AUTHORITIES="false"
+CERTIFICATE_AUTHORITIES="true"
 export COMPOSE_PROJECT_NAME="hyperblock"
 
 #COMPOSE_FILE_COUCH=docker-compose-couch.yaml
