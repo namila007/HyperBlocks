@@ -111,6 +111,36 @@ function replacePrivateKey() {
   
 }
 
+function generateNewChaincode() {
+  echo " GENERATING NEW CHAIN CODE....."
+  cd chaincode/
+  set -x
+  npm install
+  set +x
+  if [ $res -ne 0 ]; then
+    echo "Failed to generate the chain code..."
+    exit 1
+  fi
+  echo
+  cd ..
+}
+
+function generateConnectionJson() {
+  echo "GENERATING CONNECTION PROFILES FOR EACH ORGANIZATIONS>>>>>"
+  if [ "ls connection*json" ]; then
+    rm -f connection*.json
+  fi 
+  set -x
+  "./ccp-generate.sh"
+  res=$?
+  set +x
+  if [ $res -ne 0 ]; then
+    echo "Failed to generate CCP Connection profiles..."
+    exit 1
+  fi
+  echo
+}
+
 function networkUp() {
   #checkPrereqs
   # generate artifacts if they don't exist
@@ -118,16 +148,19 @@ function networkUp() {
     generateCerts
     replacePrivateKey
     generateChannelArtifacts
+
+    # if [ "${GENERATE_CHAINCODE}" == "true" ]; then
+    #   generateNewChaincode
+    # fi  
+
+    generateConnectionJson
   fi
   COMPOSE_FILES="-f ${COMPOSE_FILE}"
   if [ "${CERTIFICATE_AUTHORITIES}" == "true" ]; then
     COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_CA}"
-    echo $COMPOSE_FILES
     export BYFN_CA3_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/distributor.namz.com/ca && ls *_sk)
     export BYFN_CA1_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/supplier.namz.com/ca && ls *_sk)
     export BYFN_CA2_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/manufacturer.namz.com/ca && ls *_sk)
-    echo $BYFN_CA1_PRIVATE_KEY
-    echo $BYFN_CA2_PRIVATE_KEY
   fi
   if [ "${IF_COUCHDB}" == "couchdb" ]; then
     COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_COUCH}"
@@ -189,6 +222,8 @@ function networkDown() {
     rm -rf channel-artifacts/*.block channel-artifacts/*.tx crypto-config
     # remove the docker-compose yaml file that was customized to the example
     rm -f docker-compose-e2e.yaml
+
+    rm -f connection*.json
   fi
 }
 
@@ -200,6 +235,7 @@ CLI_DELAY=3
 COMPOSE_FILE=docker-compose-cli.yaml
 COMPOSE_FILE_CA=docker-compose-ca.yaml
 CERTIFICATE_AUTHORITIES="true"
+GENERATE_CHAINCODE="false"
 export COMPOSE_PROJECT_NAME="hyperblock"
 
 #COMPOSE_FILE_COUCH=docker-compose-couch.yaml
@@ -232,6 +268,11 @@ elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
   generateCerts
   replacePrivateKey
   generateChannelArtifacts
+  generateChannelArtifacts
+  # if [ "${GENERATE_CHAINCODE}" == "true" ]; then
+  #     generateNewChaincode
+  # fi 
+  generateConnectionJson
 elif [ "${MODE}" == "restart" ]; then ## Restart the network
   networkDown
   networkUp
@@ -243,7 +284,7 @@ else
 fi
 
 
-while getopts "h?c:t:d:f:s:l:i:o:anv" opt; do
+while getopts "h?c:t:d:f:s:l:i:o:anvg" opt; do
   case "$opt" in
   h | \?)
     printHelp
@@ -281,6 +322,10 @@ while getopts "h?c:t:d:f:s:l:i:o:anv" opt; do
     ;;
   v)
     VERBOSE=true
+    ;;
+  g)
+    GENERATE_CHAINCODE="true"  
+    generateNewChaincode
     ;;
   esac
 done

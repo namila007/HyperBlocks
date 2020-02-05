@@ -19,34 +19,47 @@ async getBatch(ctx,batchId) {
 
   }
 
-async addBatch(ctx,batchId,temperature,organization,location) {
-   
-   let batch={
+  async addBatch(ctx,batchId,temperature,organization,location) {
+    console.info('============= START : adding Batch  ===========');
+    let batch={
 
-       id:batchId,
+        id:batchId,
 
-       temp:temperature,
+        temp:temperature,
 
-       org:organization,
+        org:organization,
 
-       loc:location
+        loc:location
 
-       };
+    };
 
-    await ctx.stub.putState(batchId,Buffer.from(JSON.stringify(batch))); 
+      await ctx.stub.putState(batchId,Buffer.from(JSON.stringify(batch))); 
 
     console.log('Batch added To the ledger Succesfully..');
-    
-  }
-
-async deleteBatch(ctx,batchId) {
-   
-    await ctx.stub.deleteState(batchId); 
-    console.log('Batch `$batchId` deleted from the ledger Succesfully..');
-
+    console.info('============= END : adding Batch  ===========');  
     }
 
-   
-}
+  async deleteBatch(ctx,batchId) {
+    
+    await ctx.stub.deleteState(batchId); 
+    console.log(`Batch ${batchId} deleted from the ledger Succesfully..`);
+
+  }
+
+  async changeOrganization (ctx, batchId, newOrg) {
+    console.info('============= Start : changeOrganization ===========');
+    let batchAsbytes = await ctx.stub.getState(batchId)
+    if(!batchAsbytes || batchAsbytes.length==0) {
+      throw new Error(`${batchId} does not exist`);
+    }
+    const batch = JSON.parse(batchAsbytes.toString());
+    batch.org = newOrg;
+
+    await ctx.stub.putState(batchId, Buffer.from(JSON.stringify(batch)));
+    console.info('============= END : changeOrganization ===========');
+  }
+
+} 
+
 
 module.exports = nbcode
