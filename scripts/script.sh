@@ -94,7 +94,7 @@ if [ "${NO_CHAINCODE}" != "true" ]; then
 	# Instantiate chaincode on peer0.org2
 	echo "Instantiating chaincode on peer0.org1..."
 	instantiateChaincode 0 1
-	# sleep 20
+	sleep 10
 	
 	# # Invoke chaincode on peer0.org1 and peer0.org2
 	echo "Sending invoke transaction on peer0.org1 peer0.org2..."

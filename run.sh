@@ -204,8 +204,8 @@ export COMPOSE_PROJECT_NAME="hyperblock"
 
 #COMPOSE_FILE_COUCH=docker-compose-couch.yaml
 MODE=$1
-IMAGETAG="latest"
-export IMAGE_TAG="latest"
+IMAGETAG='1.4'
+export IMAGE_TAG='1.4'
 CONSENSUS_TYPE="solo"
 shift
 # Determine whether starting, stopping, restarting, generating or upgrading
