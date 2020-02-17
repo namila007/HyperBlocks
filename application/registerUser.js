@@ -6,9 +6,14 @@
 
 const { FileSystemWallet, Gateway, X509WalletMixin } = require('fabric-network');
 const path = require('path');
+const fs = require('fs');
 
 const ccpPath = path.resolve(__dirname, '..', 'connection-supplier.json');
+const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
+const ccp = JSON.parse(ccpJSON);
 
+let affiliation = ccp.client.organization + '.department1';
+//console.log(ccp)
 async function main() {
     try {
 
@@ -34,15 +39,23 @@ async function main() {
 
         // Create a new gateway for connecting to our peer node.
         const gateway = new Gateway();
-        await gateway.connect(ccpPath, { wallet, identity: 'admin', discovery: { enabled: true, asLocalhost: true } });
-        console.log(gateway.getClient())
+        await gateway.connect(ccp, { wallet, identity: 'admin', discovery: { enabled: true, asLocalhost: true } });
+       // console.log(gateway.getClient())
         // Get the CA client object from the gateway for interacting with the CA.
         const ca = gateway.getClient().getCertificateAuthority();
-        console.log(ca)
+        //console.log(ca)
         const adminIdentity = gateway.getCurrentIdentity();
         
+        //dd
+        const affiliationService = ca.newAffiliationService();
+        const registeredAffiliations = await affiliationService.getAll(adminIdentity);
+        if(!registeredAffiliations.result.affiliations.some(x => x.name == ccp.client.organization.toLowerCase())){
+
+            await affiliationService.create({name: affiliation, force: true}, adminIdentity);
+        }
+
         // Register the user, enroll the user, and import the new identity into the wallet.
-        const secret = await ca.register({ affiliation: 'SupplierMSP.department1', enrollmentID: 'adam', role: 'client' }, adminIdentity);
+        const secret = await ca.register({ affiliation: affiliation, enrollmentID: 'adam', role: 'client' }, adminIdentity);
         const enrollment = await ca.enroll({ enrollmentID: 'adam', enrollmentSecret: secret });
         const userIdentity = X509WalletMixin.createIdentity('SupplierMSP', enrollment.certificate, enrollment.key.toBytes());
         await wallet.import('adam', userIdentity);
