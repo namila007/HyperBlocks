@@ -98,11 +98,11 @@ if [ "${NO_CHAINCODE}" != "true" ]; then
 	
 	# # Invoke chaincode on peer0.org1 and peer0.org2
 	echo "Sending invoke transaction on peer0.org1 "
-	chaincodeInvoke 0 1 
+	chaincodeInvoke 0 1 0 2 0 3
 	
 	# Query chaincode on peer0.org1
 	echo "Querying chaincode on peer0.org1..."
-	chaincodeQuery 0 1 '{"id":"102032","temp":"68","org":"KazVith","loc":"Kandy"}'
+	chaincodeQuery 0 1 '{"RFIDtag":"5432565466","drugName":"inferon","amount":"50","organization":"ACME","dateManufactured":"2019-03-04","dateExpired":"2020-05-20","minTemp":"15","maxTemp":"20","docType":"batch"}'
 	
 	# # ## Install chaincode on peer1.org2
 	echo "Installing chaincode on peer1.org2..."
@@ -110,7 +110,7 @@ if [ "${NO_CHAINCODE}" != "true" ]; then
 
 	# # # Query on chaincode on peer1.org2, check if the result is 90
 	echo "Querying chaincode on peer1.org2..."
-	chaincodeQuery 1 2 '{"id":"102032","temp":"68","org":"KazVith","loc":"Kandy"}'
+	chaincodeQuery 1 2 '{"RFIDtag":"5432565466","drugName":"inferon","amount":"50","organization":"ACME","dateManufactured":"2019-03-04","dateExpired":"2020-05-20","minTemp":"15","maxTemp":"20","docType":"batch"}'
 	
 fi
 
