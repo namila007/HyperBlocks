@@ -112,9 +112,9 @@ class nbcode extends Contract {
     for (let i = 0; i < batch.length; i++) {
         batch[i].docType = 'batch';
         await ctx.stub.putState(batch[i].RFIDtag, Buffer.from(JSON.stringify(batch[i])));
-        // let indexName = 'drugName ~ RFIDtag'
-        // let drugNameRFIDTagIndexKey = await ctx.stub.createCompositeKey(indexName, [batch[i].drugName, batch[i].RFIDtag]);
-        // await ctx.stub.putState(drugNameRFIDTagIndexKey, Buffer.from('\u0000'));
+        let indexName = 'drugName ~ RFIDtag'
+        let drugNameRFIDTagIndexKey = await ctx.stub.createCompositeKey(indexName, [batch[i].drugName, batch[i].RFIDtag]);
+        await ctx.stub.putState(drugNameRFIDTagIndexKey, Buffer.from('\u0000'));
     
         console.info('Added <--> ', batch[i]);
     }

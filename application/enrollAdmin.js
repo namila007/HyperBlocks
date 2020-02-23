@@ -9,15 +9,24 @@ const { FileSystemWallet, X509WalletMixin } = require('fabric-network');
 const fs = require('fs');
 const path = require('path');
 
-const ccpPath = path.resolve(__dirname, '..', 'connection-supplier.json');
-const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
-const ccp = JSON.parse(ccpJSON);
 
-async function main() {
+async function main(MSPValue){
+    
+    if (!MSPValue){
+        MSPValue='SupplierMSP';
+    }
+    const org =MSPValue.toLowerCase().slice(0, -3);
+    const caServer=`ca.${org}.namz.com`;
+    const ccpPath = path.resolve(__dirname, '..', `connection-${org}.json`);
+    const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
+    const ccp = JSON.parse(ccpJSON);
+    const admin = `admin@${org}.namz.com`;
+    console.info(`Value loaded: CA SERVER >> ${caServer} \n MSP >> ${MSPValue} `);
+
     try {
 
         // Create a new CA client for interacting with the CA.
-        const caInfo = ccp.certificateAuthorities['ca.supplier.namz.com'];
+        const caInfo = ccp.certificateAuthorities[caServer];
         const caTLSCACerts = caInfo.tlsCACerts.pem;
         const ca = new FabricCAServices(caInfo.url, { trustedRoots: caTLSCACerts, verify: false }, caInfo.caName);
 
@@ -27,20 +36,20 @@ async function main() {
         console.log(`Wallet path: ${walletPath}`);
 
         // Check to see if we've already enrolled the admin user.
-        const adminExists = await wallet.exists('admin');
+        const adminExists = await wallet.exists(admin);
         if (adminExists) {
-            console.log('An identity for the admin user "admin" already exists in the wallet');
+            console.log(`An identity for the admin user ${admin} already exists in the wallet`);
             return;
         }
 
         // Enroll the admin user, and import the new identity into the wallet.
-        const enrollment = await ca.enroll({ enrollmentID: 'admin', enrollmentSecret: 'adminpw' });
-        const identity = X509WalletMixin.createIdentity('SupplierMSP', enrollment.certificate, enrollment.key.toBytes());
-        await wallet.import('admin', identity);
-        console.log('Successfully enrolled admin user "admin" and imported it into the wallet');
+        const enrollment = await ca.enroll({ enrollmentID: `admin`, enrollmentSecret: 'adminpw' });
+        const identity = X509WalletMixin.createIdentity(MSPValue, enrollment.certificate, enrollment.key.toBytes());
+        await wallet.import(admin, identity);
+        console.log(`Successfully enrolled admin user ${admin} and imported it into the wallet`);
 
     } catch (error) {
-        console.error(`Failed to enroll admin user "admin": ${error}`);
+        console.error(`Failed to enroll admin user ${admin}: ${error}`);
         process.exit(1);
     }
 }
