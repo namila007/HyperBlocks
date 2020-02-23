@@ -155,7 +155,7 @@ function networkUp() {
 
     generateConnectionJson
   fi
-  COMPOSE_FILES="-f ${COMPOSE_FILE}"
+  COMPOSE_FILES="-f ${COMPOSE_FILE} -f ${COMPOSE_FILE_COUCH}"
   if [ "${CERTIFICATE_AUTHORITIES}" == "true" ]; then
     COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILE_CA}"
     export BYFN_CA3_PRIVATE_KEY=$(cd crypto-config/peerOrganizations/distributor.namz.com/ca && ls *_sk)
@@ -234,6 +234,7 @@ LANGUAGE=node
 CLI_DELAY=3
 COMPOSE_FILE=docker-compose-cli.yaml
 COMPOSE_FILE_CA=docker-compose-ca.yaml
+COMPOSE_FILE_COUCH=docker-compose-couch.yaml
 CERTIFICATE_AUTHORITIES="true"
 GENERATE_CHAINCODE="false"
 export COMPOSE_PROJECT_NAME="hyperblock"
