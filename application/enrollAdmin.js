@@ -10,12 +10,14 @@ const fs = require('fs');
 const path = require('path');
 
 
-async function main(MSPValue){
-    
-    if (!MSPValue){
+async function enrollAdmin(organization){
+    let MSPValue;
+    if (!organization){
         MSPValue='SupplierMSP';
+    } else {
+        MSPValue = organization.charAt(0).toUpperCase()+organization.slice(1) +'MSP';
     }
-    const org =MSPValue.toLowerCase().slice(0, -3);
+    const org =organization.toLowerCase();
     const caServer=`ca.${org}.namz.com`;
     const ccpPath = path.resolve(__dirname, '..', `connection-${org}.json`);
     const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
@@ -54,4 +56,4 @@ async function main(MSPValue){
     }
 }
 
-main();
+module.exports = enrollAdmin;

@@ -8,22 +8,23 @@ const { FileSystemWallet, Gateway, X509WalletMixin } = require('fabric-network')
 const path = require('path');
 const fs = require('fs');
 
-const ccpPath = path.resolve(__dirname, '..', 'connection-supplier.json');
-const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
-const ccp = JSON.parse(ccpJSON);
 
-let affiliation = ccp.client.organization + '.department1';
-//console.log(ccp)
-async function main(MSPValue, username) {
+async function regUser(organization, username,department) {
 
-    let user;
-    if (!username && !MSPValue){
+    let user,MSPValue;
+    if (!username && !organization){
         user='eva@supplier.namz.com';
         MSPValue='SupplierMSP';
-    } else  user = `${username}@${org}.namz.com`;
-    const org =MSPValue.toLowerCase().slice(0, -3);
+    } else  {
+        user = `${username}@${organization}.namz.com`;
+        MSPValue = organization.charAt(0).toUpperCase()+organization.slice(1) +'MSP';
+    }
+    
+    const org =organization.toLowerCase();
     const caServer=`ca.${org}.namz.com`;
     const admin = `admin@${org}.namz.com`;
+    
+    const affiliation = org +"."+ department;
     const ccpPath = path.resolve(__dirname, '..', `connection-${org}.json`);
     const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
     const ccp = JSON.parse(ccpJSON);
@@ -46,7 +47,7 @@ async function main(MSPValue, username) {
         // Check to see if we've already enrolled the admin user.
         const adminExists = await wallet.exists(admin);
         if (!adminExists) {
-            console.log(`An identity for the admin user ${user} does not exist in the wallet`);
+            console.log(`An identity for the admin user ${admin} does not exist in the wallet`);
             console.log('Run the enrollAdmin.js application before retrying');
             return;
         }
@@ -60,18 +61,20 @@ async function main(MSPValue, username) {
         //console.log(ca)
         const adminIdentity = gateway.getCurrentIdentity();
         
-        //dd
+        //new affilation service
         const affiliationService = ca.newAffiliationService();
         const registeredAffiliations = await affiliationService.getAll(adminIdentity);
-        if(!registeredAffiliations.result.affiliations.some(x => x.name == ccp.client.organization.toLowerCase())){
 
+        // creating new affilation if it is not available
+        if(!registeredAffiliations.result.affiliations.some(x => x.name == org.toLowerCase() && x.affiliations.some(y=> y.name == affiliation))){
+            console.info(`Creating new department : ${affiliation}`)
             await affiliationService.create({name: affiliation, force: true}, adminIdentity);
         }
 
         // Register the user, enroll the user, and import the new identity into the wallet.
         const secret = await ca.register({ affiliation: affiliation, enrollmentID: user, role: 'client' }, adminIdentity);
         const enrollment = await ca.enroll({ enrollmentID: user, enrollmentSecret: secret });
-        const userIdentity = X509WalletMixin.createIdentity('SupplierMSP', enrollment.certificate, enrollment.key.toBytes());
+        const userIdentity = X509WalletMixin.createIdentity(MSPValue, enrollment.certificate, enrollment.key.toBytes());
         await wallet.import(user, userIdentity);
         console.log(`Successfully registered and enrolled admin user  ${user} and imported it into the wallet`);
 
@@ -81,4 +84,4 @@ async function main(MSPValue, username) {
     }
 }
 
-main();
+module.exports = regUser;
