@@ -189,7 +189,7 @@ chaincodeQuery() {
     sleep $DELAY
     echo "Attempting to Query peer${PEER}.org${ORG} ...$(($(date +%s) - starttime)) secs"
     set -x
-    peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"function":"getBatch","Args":["102032"]}' >&log.txt
+    peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"function":"queryBatch","Args":["5432565466"]}' >&log.txt
     res=$?
     set +x
     test $res -eq 0 && VALUE=$(cat log.txt | awk '/Query Result/ {print $NF}')
@@ -197,7 +197,7 @@ chaincodeQuery() {
     # removed the string "Query Result" from peer chaincode query command
     # result. as a result, have to support both options until the change
     # is merged.
-    test $rc -ne 0 && VALUE=$(cat log.txt | egrep '{"id":"102032","temp":"68","org":"KazVith","loc":"Kandy"}')
+    test $rc -ne 0 && VALUE=$(cat log.txt | egrep "${EXPECTED_RESULT}")
     test "$VALUE" = "$EXPECTED_RESULT" && let rc=0
   done
   echo
@@ -308,14 +308,14 @@ chaincodeInvoke() {
   # it using the "-o" option
   if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
     set -x
-     peer chaincode invoke -o orderer.namz.com:7050 -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c '{"function":"addBatch","Args":["102032","68","KazVith","Kandy"]}' >&log.txt
+     peer chaincode invoke -o orderer.namz.com:7050 -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c '{"function":"initLedger","Args":[]}' >&log.txt
     # peer chaincode invoke -o orderer.namz.com:7050 -C $CHANNEL_NAME -n mycc  -c '{"function":"addBatch","Args":["102032","68","KazVith","Kandy"]}' >&log.txt
     
     res=$?
     set +x
   else
     set -x
-    peer chaincode invoke -o orderer.namz.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c '{"function":"addBatch","Args":["102032","68","KazVith","Kandy"]}' >&log.txt
+    peer chaincode invoke -o orderer.namz.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c '{"function":"initLedger","Args":[]}' >&log.txt
     # peer chaincode invoke -o orderer.namz.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc  -c '{"function":"addBatch","Args":["102032","68","KazVith","Kandy"]}' >&log.txt
     
     res=$?

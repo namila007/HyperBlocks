@@ -23,7 +23,7 @@ services:
     command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.supplier.namz.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/${BYFN_CA1_PRIVATE_KEY} -b admin:adminpw -d'
     volumes:
       - ./crypto-config/peerOrganizations/supplier.namz.com/ca/:/etc/hyperledger/fabric-ca-server-config
-    container_name: ca_peersupplier
+    container_name: ca_supplier
     networks:
       - byfn
 
@@ -41,7 +41,7 @@ services:
     command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.manufacturer.namz.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/${BYFN_CA2_PRIVATE_KEY} -b admin:adminpw -d'
     volumes:
       - ./crypto-config/peerOrganizations/manufacturer.namz.com/ca/:/etc/hyperledger/fabric-ca-server-config
-    container_name: ca_peermanufacturer
+    container_name: ca_manufacturer
     networks:
       - byfn
 
@@ -53,12 +53,12 @@ services:
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.distributor.namz.com-cert.pem
       - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/${BYFN_CA3_PRIVATE_KEY}
-      - FABRIC_CA_SERVER_PORT=8054
+      - FABRIC_CA_SERVER_PORT=9054
     ports:
       - "9054:9054"
     command: sh -c 'fabric-ca-server start --ca.certfile /etc/hyperledger/fabric-ca-server-config/ca.distributor.namz.com-cert.pem --ca.keyfile /etc/hyperledger/fabric-ca-server-config/${BYFN_CA3_PRIVATE_KEY} -b admin:adminpw -d'
     volumes:
       - ./crypto-config/peerOrganizations/distributor.namz.com/ca/:/etc/hyperledger/fabric-ca-server-config
-    container_name: ca_peerdistributor
+    container_name: ca_distributor
     networks:
       - byfn  

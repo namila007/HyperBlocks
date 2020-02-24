@@ -1,2 +1,7 @@
 crypto-config/
 channel-artifacts/
+connection*.json
+docker-compose-e2e.yaml
+connection-distributor.json
+connection-manufacturer.json
+connection-supplier.json
