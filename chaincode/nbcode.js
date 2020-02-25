@@ -174,6 +174,9 @@ async createBatch(ctx, RFIDtag, drugName, amount, organization,dateManufactured,
 
 async transferBatch(ctx, RFIDtag, newOrganization) {
     console.info('============= START : changeOrganization ===========');
+    if (!RFIDtag || !newOrganization) {
+      throw new Error('Incorrect number of arguments. Expecting RFIDtag, newOrganization')
+    }
 
     let batchAsBytes = await ctx.stub.getState(RFIDtag); // get the batch from chaincode state
     if (!batchAsBytes || batchAsBytes.length === 0) {
@@ -187,7 +190,8 @@ async transferBatch(ctx, RFIDtag, newOrganization) {
       jsonResp.error = 'Failed to decode JSON of: ' + RFIDtag;
       throw new Error(jsonResp);
     }
-    batchToTransfer.organization = newOrganization; //change the organization
+    console.info(batchToTransfer);
+    batchToTransfer.organization = newOrganization.toLowerCase(); //change the organization
 
     let batchJSONasBytes = Buffer.from(JSON.stringify(batchToTransfer));
     await ctx.stub.putState(RFIDtag, batchJSONasBytes); //rewrite the batch

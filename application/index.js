@@ -4,7 +4,7 @@ const cr = require("./transactions")
 
 
 let batch = {
-    RFIDtag: "7433425236",
+    RFIDtag: "7433425231",
     drugName: "Kohoba Saban6",
     amount: "100",
     organization: "ACME",
@@ -14,11 +14,16 @@ let batch = {
     maxTemp: "25",
  };
 
-// ad("manufacturer").then(()=>reg("manufacturer","namila6","department2")).then(()=>
-// cr.createBatch("manufacturer","namila5",batch)
-
-// );
-async function queryBatch(RFIDtag,username,organization) { let data = await cr.queryBatch(RFIDtag,username,organization)
-return data
+ let userobj = {
+    username:"namila2",
+    organization:"manufacturer",
+    department:"department1"
 }
-queryBatch("7433425236","namila6","manufacturer").then((x)=>console.log(x));
+async function queryBatch(userobj,RFIDtag) { let data = await cr.queryBatch(userobj,RFIDtag)
+    return data
+    }
+// ad(userobj.organization).then(()=>reg(userobj)).then(()=>
+// cr.createBatch(userobj,batch))
+
+queryBatch(userobj,"7433425231").then((x)=>console.log(x))
+// .then(cr.transferBatch(userobj,"7433425231","UK")).then((x)=>console.log(x));

@@ -7,24 +7,28 @@
 const { FileSystemWallet, Gateway, X509WalletMixin } = require('fabric-network');
 const path = require('path');
 const fs = require('fs');
+let userobj = {
+    username:String,
+    organization:String,
+    department:String
+}
 
-
-async function regUser(organization, username,department) {
+async function regUser(userobj) {
 
     let user,MSPValue;
-    if (!username && !organization){
+    if (!userobj.username && !userobj.organization){
         user='eva@supplier.namz.com';
         MSPValue='SupplierMSP';
     } else  {
-        user = `${username}@${organization}.namz.com`;
-        MSPValue = organization.charAt(0).toUpperCase()+organization.slice(1) +'MSP';
+        user = `${userobj.username}@${userobj.organization}.namz.com`;
+        MSPValue = userobj.organization.charAt(0).toUpperCase()+userobj.organization.slice(1) +'MSP';
     }
     
-    const org =organization.toLowerCase();
+    const org =userobj.organization.toLowerCase();
     const caServer=`ca.${org}.namz.com`;
     const admin = `admin@${org}.namz.com`;
     
-    const affiliation = org +"."+ department;
+    const affiliation = org +"."+ userobj.department.toLowerCase();
     const ccpPath = path.resolve(__dirname, '..', `connection-${org}.json`);
     const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
     const ccp = JSON.parse(ccpJSON);
@@ -66,7 +70,7 @@ async function regUser(organization, username,department) {
         const registeredAffiliations = await affiliationService.getAll(adminIdentity);
 
         // creating new affilation if it is not available
-        if(!registeredAffiliations.result.affiliations.some(x => x.name == org.toLowerCase() && x.affiliations.some(y=> y.name == affiliation))){
+        if(!registeredAffiliations.result.affiliations.some(x => x.name == org && x.affiliations.some(y=> y.name == affiliation))){
             console.info(`Creating new department : ${affiliation}`)
             await affiliationService.create({name: affiliation, force: true}, adminIdentity);
         }

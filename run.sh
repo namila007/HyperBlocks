@@ -223,6 +223,7 @@ function networkDown() {
     # remove the docker-compose yaml file that was customized to the example
     rm -f docker-compose-e2e.yaml
 
+    rm -rf application/wallet
     rm -f connection*.json
   fi
 }
