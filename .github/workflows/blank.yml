@@ -30,7 +30,12 @@ jobs:
     - name: Install chaincode nodemodules
       working-directory: /home/runner/work/HyperBlocks/HyperBlocks
       run: cd chaincode/ && npm i
-      
+
     - name: Run Hyperledger
       working-directory: /home/runner/work/HyperBlocks/HyperBlocks
       run: chmod u+x run.sh && ./run.sh up
+
+    - name: Stop Hyperledger
+      working-directory: /home/runner/work/HyperBlocks/HyperBlocks
+      run: ./run.sh down
+
