@@ -28,9 +28,9 @@ jobs:
       with:
         node-version: 8.0.0    
     - name: Install chaincode nodemodules
-      working-directory: HyperBlocks/
+      working-directory: /home/runner/work/HyperBlocks/HyperBlocks
       run: cd chaincode/ && npm i
       
     - name: Run Hyperledger
-      working-directory: HyperBlocks/
+      working-directory: /home/runner/work/HyperBlocks/HyperBlocks
       run: chmode u+x run.sh && ./run.sh up
