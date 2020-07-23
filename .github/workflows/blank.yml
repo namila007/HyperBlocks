@@ -33,4 +33,4 @@ jobs:
       
     - name: Run Hyperledger
       working-directory: /home/runner/work/HyperBlocks/HyperBlocks
-      run: chmode u+x run.sh && ./run.sh up
+      run: chmod u+x run.sh && ./run.sh up
