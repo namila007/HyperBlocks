@@ -108,7 +108,7 @@ if [ "${NO_CHAINCODE}" != "true" ]; then
 	
 	# Query chaincode on peer0.org1
 	echo "Querying chaincode on peer0.org1..."
-	chaincodeQuery 0 1 '{"RFIDtag":"5432565466","amount":"50","dateExpired":"2020-05-20","dateManufactured":"2019-03-04","docType":"batch","drugName":"inferon","maxTemp":"20","minTemp":"15","organization":"ACME"}'
+	chaincodeQuery 0 1 '{"RFIDtag":"5432565466","amount":"50","block":"0","dateExpired":"2020-05-20","dateManufactured":"2019-03-04","docType":"batch","drugName":"inferon","maxTemp":"20","minTemp":"15","organization":"ACME"}'
 	
 	# # # ## Install chaincode on peer1.org2
 	# echo "Installing chaincode on peer1.org2..."
