@@ -4,21 +4,50 @@ const cr = require("./transactions")
 
 
 let batch = {
-    RFIDtag: "7433425236",
-    drugName: "Kohoba Saban6",
+    RFIDtag: "7433425230",
+    drugName: "Kohoba Saban2",
     amount: "100",
     organization: "ACME",
     dateManufactured: "2019-10-23",
     dateExpired: "2020-10-23",
     minTemp: "20",
     maxTemp: "25",
+    block:'0'
  };
-
-// ad("manufacturer").then(()=>reg("manufacturer","namila6","department2")).then(()=>
-// cr.createBatch("manufacturer","namila5",batch)
-
-// );
-async function queryBatch(RFIDtag,username,organization) { let data = await cr.queryBatch(RFIDtag,username,organization)
-return data
+const user = "user2"
+const org = {
+    supplier: "supplier",
+    distributor: "distributor",
+    manufacturer: "manufacturer"
 }
-queryBatch("7433425236","namila6","manufacturer").then((x)=>console.log(x));
+
+async function run() {
+await ad(org.supplier)
+await ad(org.distributor)
+await ad(org.manufacturer)
+
+await reg(org.supplier,user,"ACME");
+await reg(org.manufacturer,user,"Swadeshi");
+await reg(org.distributor,user,"CBL");
+
+cr.createBatch(org.supplier,user,batch)
+    .then(()=> {
+        return cr.queryBatch(batch.RFIDtag,user,org.supplier)
+    })
+    .then((x) => {console.log(x)})
+    .then(() => {
+        return cr.transportBatch(batch.RFIDtag,"Swadeshi",user,org.manufacturer)
+    })
+    .then((x) => {console.log(x)})
+    .then(() => {
+        return cr.transportBatch(batch.RFIDtag,"CBL",user,org.distributor)
+    })
+    .then((x) => {console.log(x)})
+    .then(() => {
+        return cr.queryBatchHistory(batch.RFIDtag,user,org.supplier)
+    })
+    .then((x) => {console.log(x)})
+    .catch((x) => {console.log(x)})
+}  
+
+run();
