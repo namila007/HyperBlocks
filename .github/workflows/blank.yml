@@ -27,9 +27,6 @@ jobs:
       uses: actions/setup-node@v2.1.1
       with:
         node-version: 8.0.0    
-    - name: Build and push Docker images
-      uses: docker/build-push-action@v1.1.0   
-      
     - name: Install chaincode nodemodules
       working-directory: HyperBlocks/
       run: cd chaincode/ && npm i
