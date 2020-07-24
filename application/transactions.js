@@ -29,6 +29,7 @@ async function createBatch(organization,username,batch) {
             batch.maxTemp,
             batch.block);
         console.info(`Block Created `)
+        return queryBatch(batch.RFIDtag,username,organization);
         
     }
     catch (error) {
