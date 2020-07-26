@@ -41,6 +41,7 @@ async function regUser(organization, username,department) {
         const userExists = await wallet.exists(user);
         if (userExists) {
             console.log(`An identity for the user ${user} already exists in the wallet`);
+            throw new Error (`An identity for the user ${user} already exists in the wallet`);
             return;
         }
 
@@ -77,9 +78,11 @@ async function regUser(organization, username,department) {
         const userIdentity = X509WalletMixin.createIdentity(MSPValue, enrollment.certificate, enrollment.key.toBytes());
         await wallet.import(user, userIdentity);
         console.log(`Successfully registered and enrolled admin user  ${user} and imported it into the wallet`);
+        return true;
 
     } catch (error) {
         console.error(`Failed to register user ${user}: ${error}`);
+        throw new Error (`Failed to register user ${user}: ${error}`);
         process.exit(1);
     }
 }

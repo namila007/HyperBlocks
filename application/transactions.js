@@ -26,13 +26,16 @@ async function createBatch(organization,username,batch) {
             batch.dateManufactured, 
             batch.dateExpired, 
             batch.minTemp, 
-            batch.maxTemp);
+            batch.maxTemp,
+            batch.block);
         console.info(`Block Created `)
+        return queryBatch(batch.RFIDtag,username,organization);
         
     }
     catch (error) {
         console.error(`Failed to submit transaction: ${error}`);
-        process.exit(1);
+        throw new Error(`Failed to submit transaction: ${error}`)
+        // process.exit(1);
     }
     finally {
 
@@ -46,14 +49,15 @@ async function queryBatch(RFIDtag,username,organization) {
     //No need of loading a user
     await loadDefaultValues(username,organization);
     try {
-        const result = await contract.evaluateTransaction('getHistoryForBatch',RFIDtag);
+        const result = await contract.evaluateTransaction('queryBatch',RFIDtag);
         console.info(`Block Found ${RFIDtag}`)
         await gateway.disconnect();
         return result.toString();
     }
     catch (error) {
         console.error(`Failed to fetch Block RFID ${RFIDtag} : ${error}`);
-        process.exit(1);
+        throw new Error (`Failed to fetch Block RFID ${RFIDtag} : ${error}`);
+        // process.exit(1);
     }
 }
 
@@ -82,5 +86,46 @@ async function loadDefaultValues(username,organization){
 
 }
 
-module.exports.createBatch = createBatch;
-module.exports.queryBatch = queryBatch;
+async function transportBatch(RFIDtag,newCompany,username, organization) {
+    console.log("==Transfer init ==")
+    await loadDefaultValues(username,organization);
+    try {
+        const prevBlock =  await contract.evaluateTransaction('queryBatch',RFIDtag);
+        console.log(`Old Block found ${prevBlock.toString()}`)
+        const result = await contract.submitTransaction('transferBatch', RFIDtag, newCompany);
+        console.info(`Block Found ${RFIDtag} and trasfered to ${newCompany}`)
+        await gateway.disconnect();
+        return result.toString();
+    }
+    catch (error) {
+        console.error(`Failed to fetch Block RFID ${RFIDtag} : ${error}`);
+        throw new Error(`Failed to fetch Block RFID ${RFIDtag} : ${error}`);
+        // process.exit(1);
+    }
+}
+
+async function queryBatchHistory(RFIDtag,username,organization) {
+    //No need of loading a user
+    await loadDefaultValues(username,organization);
+    try {
+        const result = await contract.evaluateTransaction('getHistoryForBatch',RFIDtag);
+        console.info(`Block History Found ${RFIDtag}`)
+        await gateway.disconnect();
+        return result.toString();
+    }
+    catch (error) {
+        console.error(`Failed to fetch Block RFID ${RFIDtag} : ${error}`);
+        throw new Error (`Failed to fetch Block RFID ${RFIDtag} : ${error}`);
+        // process.exit(1);
+    }
+}
+
+// async function queryAll (username,)
+
+
+module.exports = {
+    createBatch: createBatch,
+    queryBatch: queryBatch,
+    transportBatch: transportBatch,
+    queryBatchHistory: queryBatchHistory
+}
