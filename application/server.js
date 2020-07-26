@@ -109,6 +109,29 @@ app.get("/api/batch", async (req, res) => {
     } 
 })
 
+
+
+/**
+ * {
+ *  user = {
+    *      name:"",
+    *      organization: "",
+    *      company: ""
+    * },
+ * }
+ */
+app.get("/api/batch/all", async (req, res) => {
+    try {
+        const object = req.body
+        const value = await transactions.queryAll(object.user.name,object.user.organization) 
+        if (value) {
+            res.status(httpStatus.OK).send(JSON.parse(value))
+        } 
+    } catch (e) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(`{Error occured ${e}}`)
+    } 
+})
+
 /**
  *  {
  *  RFIDtag: "",
@@ -133,8 +156,8 @@ app.get("/api/batch/history", async (req, res) => {
 
 app.put("/api/batch/transfer", async (req, res) => {
     try {
-    const object = req.body.data
-    const value = await transactions.transportBatch(object.RFIDtag,object.company,object.user.name,object.organization) 
+    const object = req.body
+    const value = await transactions.transportBatch(object.RFIDtag,object.user.company,object.user.name,object.user.organization) 
         if (value) {
         res.status(httpStatus.OK).send(JSON.parse(value))
         } 
