@@ -15,7 +15,7 @@ const wallet = new FileSystemWallet(walletPath);
 async function createBatch(organization,username,batch) {
     await loadDefaultValues(username,organization);
     try {
-        
+        batch.block = batch.block || "0"
         // Submit the 'createBatch' transaction to the smart contract, and wait for it
             // to be committed to the ledger.
         await contract.submitTransaction('createBatch',
@@ -120,6 +120,20 @@ async function queryBatchHistory(RFIDtag,username,organization) {
     }
 }
 
+async function queryAll(username, organization) {
+    await loadDefaultValues(username,organization);
+    try {
+        const result = await contract.evaluateTransaction('queryAllBatches','0000000000', '9999999999');
+        console.info(`Blocks Found`)
+        await gateway.disconnect();
+        return result.toString();
+    }
+    catch (error) {
+        console.error(`Failed to fetch Block RFID ${RFIDtag} : ${error}`);
+        throw new Error (`Failed to fetch Block RFID ${RFIDtag} : ${error}`);
+        // process.exit(1);
+    }
+}
 // async function queryAll (username,)
 
 
@@ -127,5 +141,6 @@ module.exports = {
     createBatch: createBatch,
     queryBatch: queryBatch,
     transportBatch: transportBatch,
-    queryBatchHistory: queryBatchHistory
+    queryBatchHistory: queryBatchHistory,
+    queryAll: queryAll
 }

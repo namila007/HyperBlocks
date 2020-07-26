@@ -204,6 +204,7 @@ class nbcode extends Contract {
         batchToTransfer.block = (block+1).toString();
         let batchJSONasBytes = Buffer.from(JSON.stringify(batchToTransfer));
         await ctx.stub.putState(RFIDtag, batchJSONasBytes); //rewrite the batch
+        return true;
         console.info('============= END : changeOrganization ===========');
     }
 
