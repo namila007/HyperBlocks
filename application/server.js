@@ -44,10 +44,14 @@ app.get("/api/status", async (req, res) => {
  */
 
 app.post("/api/user", async (req, res) => {
-    const user = req.body.user
-    const val = await registerUser(user.organization, user.name, user.company)
-    if(val) {
-        res.status(httpStatus.CREATED).send("user created")
+    try {
+        const user = req.body.user
+        const val = await registerUser(user.organization, user.name, user.company)
+        if(val) {
+            res.status(httpStatus.CREATED).send("user created")
+        }
+    } catch (e) {
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send(`{Error occured ${e}}`)
     }
 })
 
@@ -72,11 +76,15 @@ app.post("/api/user", async (req, res) => {
 }
  */
 app.post("/api/batch", async (req, res) => {
-    const object = req.body
-    const value = await transactions.createBatch(object.user.organization,object.user.name, object.batch) 
-    if (value) {
-        res.status(httpStatus.CREATED).send(JSON.parse(value))
-    } else res.status(httpStatus.INTERNAL_SERVER_ERROR).send(`Error occured ${value}`)
+    try {
+        const object = req.body
+        const value = await transactions.createBatch(object.user.organization,object.user.name, object.batch) 
+        if (value) {
+            res.status(httpStatus.CREATED).send(JSON.parse(value))
+        } 
+    } catch (e) {
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send(`{Error occured ${e}}`)
+    }
 })
 
 /**
@@ -90,11 +98,15 @@ app.post("/api/batch", async (req, res) => {
  * }
  */
 app.get("/api/batch", async (req, res) => {
-    const object = req.body
-    const value = await transactions.queryBatch(object.RFIDtag,object.user.name,object.user.organization) 
-    if (value) {
-        res.status(httpStatus.OK).send(JSON.parse(value))
-    } else res.status(httpStatus.INTERNAL_SERVER_ERROR).send(`Error occured ${value}`)
+    try {
+        const object = req.body
+        const value = await transactions.queryBatch(object.RFIDtag,object.user.name,object.user.organization) 
+        if (value) {
+            res.status(httpStatus.OK).send(JSON.parse(value))
+        } 
+    } catch (e) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(`{Error occured ${e}}`)
+    } 
 })
 
 /**
@@ -108,23 +120,32 @@ app.get("/api/batch", async (req, res) => {
  * }
  */
 app.get("/api/batch/history", async (req, res) => {
+    try {
     const object = req.body
     const value = await transactions.queryBatchHistory(object.RFIDtag,object.user.name,object.user.organization) 
     if (value) {
         res.status(httpStatus.OK).send(JSON.parse(value))
-    } else res.status(httpStatus.INTERNAL_SERVER_ERROR).send(`Error occured ${value}`)
+    }
+    } catch (e) {
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send(`{Error occured ${e}}`)
+    } 
 })
 
 app.put("/api/batch/transfer", async (req, res) => {
+    try {
     const object = req.body.data
     const value = await transactions.transportBatch(object.RFIDtag,object.company,object.user.name,object.organization) 
-    if (value) {
+        if (value) {
         res.status(httpStatus.OK).send(JSON.parse(value))
-    } else res.status(httpStatus.INTERNAL_SERVER_ERROR).send(`Error occured ${value}`)
+        } 
+    } catch (e) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send(`{Error occured ${e}}`)
+} 
+    
 })
 
 enrollAdmins()
 
 app.listen(3030,() => {
-console.log(`NCK App run in PORT:3030`)
+    console.log(`NCK App run in PORT:3030`)
 })

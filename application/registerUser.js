@@ -41,7 +41,8 @@ async function regUser(organization, username,department) {
         const userExists = await wallet.exists(user);
         if (userExists) {
             console.log(`An identity for the user ${user} already exists in the wallet`);
-            return true;
+            throw new Error (`An identity for the user ${user} already exists in the wallet`);
+            return;
         }
 
         // Check to see if we've already enrolled the admin user.
@@ -81,6 +82,7 @@ async function regUser(organization, username,department) {
 
     } catch (error) {
         console.error(`Failed to register user ${user}: ${error}`);
+        throw new Error (`Failed to register user ${user}: ${error}`);
         process.exit(1);
     }
 }

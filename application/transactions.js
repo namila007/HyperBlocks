@@ -34,7 +34,8 @@ async function createBatch(organization,username,batch) {
     }
     catch (error) {
         console.error(`Failed to submit transaction: ${error}`);
-        process.exit(1);
+        throw new Error(`Failed to submit transaction: ${error}`)
+        // process.exit(1);
     }
     finally {
 
@@ -55,7 +56,8 @@ async function queryBatch(RFIDtag,username,organization) {
     }
     catch (error) {
         console.error(`Failed to fetch Block RFID ${RFIDtag} : ${error}`);
-        process.exit(1);
+        throw new Error (`Failed to fetch Block RFID ${RFIDtag} : ${error}`);
+        // process.exit(1);
     }
 }
 
@@ -97,7 +99,8 @@ async function transportBatch(RFIDtag,newCompany,username, organization) {
     }
     catch (error) {
         console.error(`Failed to fetch Block RFID ${RFIDtag} : ${error}`);
-        process.exit(1);
+        throw new Error(`Failed to fetch Block RFID ${RFIDtag} : ${error}`);
+        // process.exit(1);
     }
 }
 
@@ -112,9 +115,12 @@ async function queryBatchHistory(RFIDtag,username,organization) {
     }
     catch (error) {
         console.error(`Failed to fetch Block RFID ${RFIDtag} : ${error}`);
-        process.exit(1);
+        throw new Error (`Failed to fetch Block RFID ${RFIDtag} : ${error}`);
+        // process.exit(1);
     }
 }
+
+// async function queryAll (username,)
 
 
 module.exports = {
